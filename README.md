@@ -14,11 +14,11 @@ Usage
 
 The plug is located in Filter > Artistic > Stickerify
 
-![menu](./menu-colors.png)
-![menu](./menu.png)
+![menu-old](./menu.png)
 
 And provide the following options:
 
+![menu](./options_colors.png)
 ![screenshot](./screenshot.png)
 
 Installation
