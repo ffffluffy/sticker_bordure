@@ -4,7 +4,9 @@ import gimpfu
 from gimpfu import pdb
 
 
-def stickerify_bordure(image, current_layer, black_grow=3, white_grow=12, shadow=True, canvas_increase=0, resize=False):
+def stickerify_bordure(image, current_layer, resize=False, black_grow=3, white_grow=12,
+                       border_color_fg=(1.0, 1.0, 1.0), border_color_bg=(0.0, 0.0, 0.0),
+                       shadow=True, canvas_increase=0):
     def duplicate_layer():
         copy = current_layer.copy()
         image.add_layer(copy)
@@ -12,15 +14,20 @@ def stickerify_bordure(image, current_layer, black_grow=3, white_grow=12, shadow
         image.active_layer = current_layer
         return copy
 
-    def fill_black():
+    def fill_bg():
         pdb.gimp_edit_bucket_fill(current_layer, 1, 0, 100, 255, 0, 0, 0)
 
-    def fill_white():
+    def fill_black():
+        set_colors(background_color=(0,0,0))
+        fill_bg()
+        set_colors(foreground_color=border_color_fg, background_color=border_color_bg)
+
+    def fill_fg():
         pdb.gimp_edit_bucket_fill(current_layer, 0, 0, 100, 255, 0, 0, 0)
 
-    def set_colors():
-        pdb.gimp_context_set_foreground((255, 255, 255))
-        pdb.gimp_context_set_background((0, 0, 0))
+    def set_colors(foreground_color=(255, 255, 255), background_color=(0, 0, 0)):
+        pdb.gimp_context_set_foreground(foreground_color)
+        pdb.gimp_context_set_background(background_color)
 
     pdb.gimp_context_push()
     pdb.gimp_image_undo_group_start(image)
@@ -28,7 +35,8 @@ def stickerify_bordure(image, current_layer, black_grow=3, white_grow=12, shadow
     # clean selection to avoid bugs
     pdb.gimp_selection_none(image)
 
-    set_colors()
+    # we set the foreground and background color of the border
+    set_colors(foreground_color=border_color_fg, background_color=border_color_bg)
 
     # resize early to avoid compressing the bordure
     if resize:
@@ -63,12 +71,12 @@ def stickerify_bordure(image, current_layer, black_grow=3, white_grow=12, shadow
     pdb.gimp_image_select_item(image, 0, current_layer)
 
     pdb.gimp_selection_grow(image, black_grow)
-    fill_black()
+    fill_bg()
 
     second_layer = duplicate_layer()
 
     pdb.gimp_selection_grow(image, white_grow)
-    fill_white()
+    fill_fg()
 
     if shadow:
         duplicate_layer()
@@ -109,6 +117,8 @@ gimpfu.register(
         (gimpfu.PF_TOGGLE, "resize", "Resize/fit into 512x512", False),
         (gimpfu.PF_ADJUSTMENT, "black_grow", "Size of black bordure (px)", 3, (0, 200, 1, 3, 0, 0)),
         (gimpfu.PF_ADJUSTMENT, "white_grow", "Size of white bordure (px)", 12, (0, 200, 1, 3, 0, 0)),
+        (gimpfu.PF_COLOUR, "border_color_fg", "Color of the outer border", (1.0, 1.0, 1.0)),
+        (gimpfu.PF_COLOUR, "border_color_bg", "Color of the inner border", (0.0, 0.0, 0.0)),
         (gimpfu.PF_TOGGLE, "shadow", "Display shadow", True),
         (gimpfu.PF_ADJUSTMENT, "canvas_increase", "Increase canvas size (in %)", 0, (0, 100, 1, 3, 0, 0)),
     ],
