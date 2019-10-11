@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-
 import gimpfu
 from gimpfu import pdb
 
 
-def stickerify_bordure(image, current_layer, resize=False, black_grow=3, white_grow=12,
+def stickerify_bordure(image, current_layer, resize=False, inner_grow=3, outer_grow=12,
                        border_color_fg=(1.0, 1.0, 1.0), border_color_bg=(0.0, 0.0, 0.0),
                        shadow=True, canvas_increase=0):
     def duplicate_layer():
@@ -70,12 +69,12 @@ def stickerify_bordure(image, current_layer, resize=False, black_grow=3, white_g
     # alpha to selection
     pdb.gimp_image_select_item(image, 0, current_layer)
 
-    pdb.gimp_selection_grow(image, black_grow)
+    pdb.gimp_selection_grow(image, inner_grow)
     fill_bg()
 
     second_layer = duplicate_layer()
 
-    pdb.gimp_selection_grow(image, white_grow)
+    pdb.gimp_selection_grow(image, outer_grow)
     fill_fg()
 
     if shadow:
@@ -115,8 +114,8 @@ gimpfu.register(
     "",
     [
         (gimpfu.PF_TOGGLE, "resize", "Resize/fit into 512x512", False),
-        (gimpfu.PF_ADJUSTMENT, "black_grow", "Size of black bordure (px)", 3, (0, 200, 1, 3, 0, 0)),
-        (gimpfu.PF_ADJUSTMENT, "white_grow", "Size of white bordure (px)", 12, (0, 200, 1, 3, 0, 0)),
+        (gimpfu.PF_ADJUSTMENT, "inner_grow", "Size of inner bordure (px)", 3, (0, 200, 1, 3, 0, 0)),
+        (gimpfu.PF_ADJUSTMENT, "outer_grow", "Size of outer bordure (px)", 12, (0, 200, 1, 3, 0, 0)),
         (gimpfu.PF_COLOUR, "border_color_fg", "Color of the outer border", (1.0, 1.0, 1.0)),
         (gimpfu.PF_COLOUR, "border_color_bg", "Color of the inner border", (0.0, 0.0, 0.0)),
         (gimpfu.PF_TOGGLE, "shadow", "Display shadow", True),
